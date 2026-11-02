@@ -1,0 +1,1966 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tính Cấu Hình Electron - Chuẩn Hóa Học THPT &amp; IUPAC</title>
+  <meta name="description" content="Công cụ tính cấu hình electron chuẩn xác cho 118 nguyên tố và ion, sơ đồ orbital, electron độc thân và bảng tuần hoàn THPT.">
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --card-sub: #f1f5f9;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --primary-light: #eff6ff;
+      --s-bg: #ffe4e6;
+      --s-text: #be123c;
+      --s-border: #fecdd3;
+      --p-bg: #d1fae5;
+      --p-text: #047857;
+      --p-border: #a7f3d0;
+      --d-bg: #e0f2fe;
+      --d-text: #0369a1;
+      --d-border: #bae6fd;
+      --f-bg: #f3e8ff;
+      --f-text: #7e22ce;
+      --f-border: #e9d5ff;
+      --accent: #f59e0b;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+      --radius: 14px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not(.light) {
+        --bg: #090d16;
+        --card-bg: #131b2e;
+        --card-sub: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #3b82f6;
+        --primary-hover: #60a5fa;
+        --primary-light: #172554;
+        --s-bg: #4c0519;
+        --s-text: #fda4af;
+        --s-border: #881337;
+        --p-bg: #064e3b;
+        --p-text: #6ee7b7;
+        --p-border: #047857;
+        --d-bg: #082f49;
+        --d-text: #7dd3fc;
+        --d-border: #0369a1;
+        --f-bg: #3b0764;
+        --f-text: #d8b4fe;
+        --f-border: #6b21a8;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.4);
+      }
+    }
+
+    html.dark {
+      --bg: #090d16;
+      --card-bg: #131b2e;
+      --card-sub: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --primary: #3b82f6;
+      --primary-hover: #60a5fa;
+      --primary-light: #172554;
+      --s-bg: #4c0519;
+      --s-text: #fda4af;
+      --s-border: #881337;
+      --p-bg: #064e3b;
+      --p-text: #6ee7b7;
+      --p-border: #047857;
+      --d-bg: #082f49;
+      --d-text: #7dd3fc;
+      --d-border: #0369a1;
+      --f-bg: #3b0764;
+      --f-text: #d8b4fe;
+      --f-border: #6b21a8;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.4);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding-bottom: 60px;
+      transition: background-color 0.2s, color 0.2s;
+    }
+
+    .container {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+
+    /* Header */
+    header {
+      background-color: var(--card-bg);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05);
+    }
+
+    .header-content {
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 20px;
+    }
+
+    .logo-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .logo-sub {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-toggle-mode {
+      display: flex;
+      background-color: var(--card-sub);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 3px;
+      font-size: 0.75rem;
+    }
+
+    .btn-toggle-mode button {
+      padding: 4px 10px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      color: var(--text-muted);
+      border-radius: 7px;
+      font-weight: 600;
+      transition: all 0.15s;
+    }
+
+    .btn-toggle-mode button.active {
+      background-color: var(--card-bg);
+      color: var(--primary);
+      box-shadow: 0 1px 2px rgb(0 0 0 / 0.1);
+    }
+
+    .btn-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background-color: var(--card-bg);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn-icon:hover {
+      background-color: var(--card-sub);
+    }
+
+    /* Cards */
+    .card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      margin-top: 18px;
+    }
+
+    .card-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Search & Input Form */
+    .search-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: flex-end;
+    }
+
+    .search-input-wrapper {
+      flex: 1 1 240px;
+      position: relative;
+    }
+
+    .search-input-wrapper label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .search-box-inner {
+      display: flex;
+      gap: 8px;
+    }
+
+    .input-field {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background-color: var(--card-sub);
+      color: var(--text);
+      font-size: 0.95rem;
+      font-weight: 500;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .input-field:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    .btn-plus {
+      padding: 0 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background-color: var(--primary-light);
+      color: var(--primary);
+      font-size: 1.3rem;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+
+    .btn-plus:hover {
+      background-color: var(--primary);
+      color: #fff;
+    }
+
+    .charge-wrapper {
+      flex: 0 1 180px;
+    }
+
+    .charge-wrapper label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .btn-submit {
+      padding: 10px 22px;
+      border-radius: 10px;
+      border: none;
+      background: linear-gradient(135deg, #2563eb, #3b82f6);
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      height: 44px;
+      box-shadow: 0 2px 4px rgba(37, 99, 235, 0.25);
+      transition: all 0.15s;
+    }
+
+    .btn-submit:hover {
+      background: linear-gradient(135deg, #1d4ed8, #2563eb);
+      transform: translateY(-1px);
+    }
+
+    /* Autocomplete */
+    .autocomplete-list {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 50px;
+      margin-top: 4px;
+      background-color: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+      z-index: 50;
+      overflow: hidden;
+      max-height: 250px;
+      overflow-y: auto;
+      display: none;
+    }
+
+    .autocomplete-item {
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.85rem;
+    }
+
+    .autocomplete-item:hover {
+      background-color: var(--card-sub);
+    }
+
+    .autocomplete-item:last-child {
+      border-bottom: none;
+    }
+
+    /* Error Alert */
+    .alert-error {
+      margin-top: 10px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      background-color: #fef2f2;
+      color: #b91c1c;
+      border: 1px solid #fecaca;
+      font-size: 0.85rem;
+      display: none;
+    }
+
+    .dark .alert-error {
+      background-color: #450a0a;
+      color: #fca5a5;
+      border-color: #7f1d1d;
+    }
+
+    /* History */
+    .history-card {
+      padding: 12px 18px;
+    }
+
+    .history-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .history-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .history-btn {
+      padding: 4px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background-color: var(--card-sub);
+      color: var(--text);
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .history-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    /* Big Config View */
+    .config-box {
+      padding: 16px;
+      background-color: var(--card-sub);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 1.45rem;
+      font-weight: 800;
+      line-height: 1.6;
+      word-break: break-word;
+    }
+
+    .config-subshell {
+      display: inline-block;
+      margin-right: 10px;
+    }
+
+    .config-subshell sup {
+      font-size: 0.95rem;
+      margin-left: 1px;
+    }
+
+    /* Blocks colors */
+    .block-s { color: #e11d48; }
+    .block-p { color: #059669; }
+    .block-d { color: #0284c7; }
+    .block-f { color: #9333ea; }
+
+    /* Orbital Diagram */
+    .orbital-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: flex-end;
+      padding: 16px;
+      background-color: var(--card-sub);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow-x: auto;
+    }
+
+    .orbital-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .orbital-boxes {
+      display: flex;
+    }
+
+    .orbital-box {
+      width: 38px;
+      height: 46px;
+      border: 1px solid var(--border);
+      background-color: var(--card-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.15rem;
+      font-weight: 900;
+      margin-right: -1px;
+      user-select: none;
+    }
+
+    .spin-up { color: #2563eb; }
+    .spin-down { color: #e11d48; }
+
+    .orbital-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 5px;
+      background-color: var(--card-bg);
+      border: 1px solid var(--border);
+    }
+
+    /* Grid cards */
+    .grid-shells {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 8px;
+    }
+
+    .shell-item {
+      padding: 10px;
+      text-align: center;
+      border-radius: 10px;
+      background-color: var(--card-sub);
+      border: 1px solid var(--border);
+    }
+
+    .shell-count {
+      font-size: 1.35rem;
+      font-weight: 900;
+    }
+
+    .shell-name {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .grid-info {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 10px;
+      font-size: 0.85rem;
+    }
+
+    .info-item {
+      padding: 10px;
+      border-radius: 8px;
+      background-color: var(--card-sub);
+      border: 1px solid var(--border);
+    }
+
+    .info-item label {
+      display: block;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .info-item strong {
+      font-size: 0.95rem;
+    }
+
+    /* Exception Warning Card */
+    .card-exception {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(234, 88, 12, 0.15));
+      border: 2px solid #f59e0b;
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin-top: 18px;
+    }
+
+    .card-exception-title {
+      font-weight: 800;
+      color: #b45309;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.95rem;
+    }
+
+    .dark .card-exception-title {
+      color: #fbbf24;
+    }
+
+    .card-exception-body {
+      margin-top: 6px;
+      font-size: 0.85rem;
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    /* Modal Periodic Table */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(3px);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+      display: none;
+    }
+
+    .modal-box {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      width: 100%;
+      max-width: 1100px;
+      max-height: 92vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
+    }
+
+    .modal-header {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-body {
+      padding: 16px;
+      overflow-x: auto;
+      overflow-y: auto;
+    }
+
+    .ptable-grid {
+      display: grid;
+      grid-template-columns: repeat(18, minmax(52px, 1fr));
+      gap: 3px;
+      min-width: 950px;
+      user-select: none;
+    }
+
+    .ptable-cell {
+      height: 48px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      padding: 2px 4px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      cursor: pointer;
+      font-size: 0.7rem;
+      transition: transform 0.1s, box-shadow 0.1s;
+      background-color: var(--card-sub);
+    }
+
+    .ptable-cell:hover {
+      transform: scale(1.08);
+      z-index: 10;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    .ptable-cell .z { font-size: 0.6rem; opacity: 0.7; }
+    .ptable-cell .sym { font-weight: 800; font-size: 0.85rem; text-align: center; }
+    .ptable-cell .name { font-size: 0.55rem; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .ptable-cell.b-s { background-color: var(--s-bg); color: var(--s-text); border-color: var(--s-border); }
+    .ptable-cell.b-p { background-color: var(--p-bg); color: var(--p-text); border-color: var(--p-border); }
+    .ptable-cell.b-d { background-color: var(--d-bg); color: var(--d-text); border-color: var(--d-border); }
+    .ptable-cell.b-f { background-color: var(--f-bg); color: var(--f-text); border-color: var(--f-border); }
+
+    .ptable-marker {
+      height: 48px;
+      border-radius: 6px;
+      border: 1px dashed #a855f7;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: #a855f7;
+      text-align: center;
+    }
+
+    .ptable-spacer {
+      grid-column: span 18;
+      height: 12px;
+    }
+
+    .series-label {
+      grid-column: span 2;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 8px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #a855f7;
+    }
+
+    /* Top Result Bar */
+    .result-header-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 16px 20px;
+      border-radius: var(--radius);
+      background-color: var(--card-bg);
+      border: 1px solid var(--border);
+      margin-top: 18px;
+    }
+
+    .result-element-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .result-sym-badge {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      font-weight: 900;
+      border: 1px solid var(--border);
+    }
+
+    .btn-action {
+      padding: 6px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background-color: var(--card-sub);
+      color: var(--text);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s;
+    }
+
+    .btn-action:hover {
+      background-color: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+
+    @media (max-width: 640px) {
+      .header-content { height: auto; padding: 12px 0; flex-wrap: wrap; }
+      .search-row { flex-direction: column; align-items: stretch; }
+      .charge-wrapper { flex: 1 1 100%; }
+      .config-box { font-size: 1.15rem; }
+      .result-header-bar { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="container header-content">
+      <div class="logo-area">
+        <div class="logo-icon">⚛</div>
+        <div>
+          <h1 class="logo-title">Tính cấu hình electron</h1>
+          <div class="logo-sub">Chuẩn Hóa Học THPT &amp; IUPAC 118 nguyên tố</div>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <!-- Chế độ: THPT vs Đầy đủ -->
+        <div class="btn-toggle-mode">
+          <button id="btn-mode-thpt" class="active" onclick="setExceptionMode('thpt')" title="Chỉ xem Cr và Cu là ngoại lệ theo SGK">THPT</button>
+          <button id="btn-mode-full" onclick="setExceptionMode('full')" title="Đầy đủ 20 nguyên tố ngoại lệ theo IUPAC">Đầy đủ</button>
+        </div>
+
+        <!-- Chế độ sáng / tối -->
+        <button class="btn-icon" onclick="toggleTheme()" aria-label="Đổi giao diện sáng tối" title="Đổi giao diện">🌓</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="container">
+
+    <!-- 1. Ô nhập theo yêu cầu -->
+    <div class="card">
+      <div class="search-input-wrapper">
+        <label for="input-search">Nhập ký hiệu, Z, tên nguyên tố hoặc ion:</label>
+        <div class="search-row">
+          <div class="search-input-wrapper">
+            <div class="search-box-inner">
+              <input
+                id="input-search"
+                type="text"
+                class="input-field"
+                placeholder="Ví dụ: Fe, 26, Sắt, Fe3+, Cl-, Cu, Na+..."
+                autocomplete="off"
+                oninput="onSearchInput(this.value)"
+                onkeydown="if(event.key==='Enter') executeCalc()"
+                value="Fe"
+              />
+              <button class="btn-plus" onclick="openModal()" title="Mở bảng tuần hoàn 118 nguyên tố">+</button>
+            </div>
+            <!-- Gợi ý tự động -->
+            <div id="autocomplete-box" class="autocomplete-list"></div>
+          </div>
+
+          <div class="charge-wrapper">
+            <label for="select-charge">Điện tích ion:</label>
+            <select id="select-charge" class="input-field" onchange="onChargeSelect(this.value)">
+              <option value="0">0 (Nguyên tử trung hòa)</option>
+              <optgroup label="Cation (Ion dương)">
+                <option value="1">+1 (Mất 1 e, Na⁺, K⁺)</option>
+                <option value="2">+2 (Mất 2 e, Fe²⁺, Mg²⁺)</option>
+                <option value="3">+3 (Mất 3 e, Fe³⁺, Al³⁺)</option>
+                <option value="4">+4 (Mất 4 e, Sn⁴⁺)</option>
+                <option value="5">+5 (Mất 5 e)</option>
+                <option value="6">+6 (Mất 6 e)</option>
+                <option value="7">+7 (Mất 7 e, Mn⁷⁺)</option>
+                <option value="8">+8 (Mất 8 e, Os⁸⁺)</option>
+              </optgroup>
+              <optgroup label="Anion (Ion âm)">
+                <option value="-1">-1 (Nhận 1 e, Cl⁻, F⁻)</option>
+                <option value="-2">-2 (Nhận 2 e, O²⁻, S²⁻)</option>
+                <option value="-3">-3 (Nhận 3 e, N³⁻)</option>
+                <option value="-4">-4 (Nhận 4 e, C⁴⁻)</option>
+              </optgroup>
+            </select>
+          </div>
+
+          <div>
+            <button class="btn-submit" onclick="executeCalc()">
+              <span>🔍</span> Xem cấu hình
+            </button>
+          </div>
+        </div>
+
+        <div id="alert-box" class="alert-error"></div>
+      </div>
+    </div>
+
+    <!-- Lịch sử 10 tra cứu gần nhất (Biến JS in-memory) -->
+    <div id="history-card" class="card history-card" style="display: none;">
+      <div class="history-header">
+        <span>Lịch sử 10 tra cứu gần nhất:</span>
+        <button style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:0.75rem; text-decoration:underline;" onclick="clearHistory()">Xóa lịch sử</button>
+      </div>
+      <div id="history-tags" class="history-tags"></div>
+    </div>
+
+    <!-- Thanh tổng quan kết quả & Công tắc sắp xếp & Sao chép -->
+    <div id="result-summary-bar" class="result-header-bar" style="display: none;">
+      <div class="result-element-title">
+        <div id="badge-element-sym" class="result-sym-badge">Fe</div>
+        <div>
+          <div style="font-size: 1.15rem; font-weight: 800; display:flex; align-items:center; gap:8px;">
+            <span id="title-element-name">Sắt</span>
+            <span id="badge-z" style="font-size:0.75rem; padding:2px 8px; border-radius:12px; background:var(--card-sub); border:1px solid var(--border);">Z = 26</span>
+            <span id="badge-electrons" style="font-size:0.75rem; padding:2px 8px; border-radius:12px; background:var(--primary-light); color:var(--primary); font-weight:700;">26 e</span>
+          </div>
+          <div id="sub-element-info" style="font-size: 0.78rem; color: var(--text-muted);">
+            Sắt (Iron) • Khối lượng: 55.845 • Chu kỳ 4, Nhóm VIIIB
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+        <!-- Công tắc sắp xếp: Theo lớp vs Theo mức năng lượng -->
+        <div class="btn-toggle-mode">
+          <button id="btn-order-shell" class="active" onclick="setOrderMode('shell')">Theo lớp (SGK)</button>
+          <button id="btn-order-energy" onclick="setOrderMode('energy')">Theo mức năng lượng</button>
+        </div>
+
+        <!-- Nút sao chép kết quả thuần -->
+        <button class="btn-action" onclick="copyPlainReport()" id="btn-copy">
+          📋 <span>Sao chép kết quả</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- i. Thẻ cảnh báo ngoại lệ (hiện khi là ngoại lệ) -->
+    <div id="card-exception" class="card-exception" style="display: none;">
+      <div class="card-exception-title">
+        ⚡ Ngoại lệ cấu hình electron (Thực nghiệm)
+      </div>
+      <div id="text-exception-reason" class="card-exception-body"></div>
+    </div>
+
+    <!-- Khu vực các thẻ kết quả từ a đến h -->
+    <div id="results-wrapper" style="display: none;">
+
+      <!-- a. Cấu hình electron đầy đủ -->
+      <div class="card">
+        <div class="card-title">
+          <span>a. Cấu hình electron đầy đủ</span>
+          <span id="label-order-hint" style="font-size: 0.7rem; font-weight: 500; text-transform: none;">Sắp theo lớp n tăng dần</span>
+        </div>
+        <div id="box-full-config" class="config-box"></div>
+      </div>
+
+      <!-- b. Cấu hình electron rút gọn bằng khí hiếm -->
+      <div class="card">
+        <div class="card-title">
+          <span>b. Cấu hình electron rút gọn bằng khí hiếm</span>
+          <span id="label-condensed-hint" style="font-size: 0.7rem; font-weight: 500; text-transform: none; color: var(--primary);"></span>
+        </div>
+        <div id="box-condensed-config" class="config-box"></div>
+      </div>
+
+      <!-- c. Sơ đồ orbital -->
+      <div class="card">
+        <div class="card-title">
+          <span>c. Sơ đồ Orbital (Ô lượng tử)</span>
+          <span style="font-size: 0.7rem; font-weight: 500; text-transform: none;">Quy tắc Hund &amp; Nguyên lý Pauli (Spin ↑↓)</span>
+        </div>
+        <div id="box-orbital-diagram" class="orbital-container"></div>
+      </div>
+
+      <!-- d. Số electron từng lớp (K, L, M, N, O, P, Q) -->
+      <div class="card">
+        <div class="card-title">
+          <span>d. Số electron từng lớp (K, L, M, N, O, P, Q)</span>
+          <span id="label-total-electrons" style="font-size: 0.75rem; font-weight: 700;"></span>
+        </div>
+        <div id="grid-shells" class="grid-shells"></div>
+      </div>
+
+      <!-- e. Số electron từng phân lớp (s, p, d, f) -->
+      <div class="card">
+        <div class="card-title">
+          <span>e. Số electron từng phân lớp (s, p, d, f)</span>
+        </div>
+        <div class="grid-shells" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 12px;">
+          <div class="shell-item" style="border-color: var(--s-border);">
+            <div class="shell-name block-s">Phân lớp s</div>
+            <div id="count-block-s" class="shell-count block-s">0</div>
+          </div>
+          <div class="shell-item" style="border-color: var(--p-border);">
+            <div class="shell-name block-p">Phân lớp p</div>
+            <div id="count-block-p" class="shell-count block-p">0</div>
+          </div>
+          <div class="shell-item" style="border-color: var(--d-border);">
+            <div class="shell-name block-d">Phân lớp d</div>
+            <div id="count-block-d" class="shell-count block-d">0</div>
+          </div>
+          <div class="shell-item" style="border-color: var(--f-border);">
+            <div class="shell-name block-f">Phân lớp f</div>
+            <div id="count-block-f" class="shell-count block-f">0</div>
+          </div>
+        </div>
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 6px;">Chi tiết từng phân lớp riêng:</div>
+        <div id="subshells-detail" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
+      </div>
+
+      <!-- f. Số electron độc thân & Tính chất từ -->
+      <div class="card">
+        <div class="card-title">
+          <span>f. Số electron độc thân &amp; Tính chất từ</span>
+        </div>
+        <div class="grid-info" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+          <div class="info-item">
+            <label>Số electron độc thân</label>
+            <div style="font-size: 1.5rem; font-weight: 900;" id="count-unpaired">0</div>
+            <div id="text-unpaired-list" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;"></div>
+          </div>
+          <div class="info-item">
+            <label>Tính chất từ</label>
+            <div id="badge-magnetic" style="font-size: 1.15rem; font-weight: 800; display:inline-block; padding:2px 10px; border-radius:6px; margin:4px 0;"></div>
+            <div id="text-magnetic-desc" style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.4;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- g. Electron hóa trị -->
+      <div class="card">
+        <div class="card-title">
+          <span>g. Electron hóa trị</span>
+        </div>
+        <div class="info-item" style="padding: 14px;">
+          <div style="display:flex; align-items:baseline; gap:8px;">
+            <span id="count-valence" style="font-size: 1.8rem; font-weight: 900; color: var(--primary);">0</span>
+            <span style="font-weight: 700;">electron hóa trị</span>
+          </div>
+          <div id="text-valence-desc" style="font-size: 0.85rem; color: var(--text-muted); margin-top: 6px; line-height: 1.5;"></div>
+        </div>
+      </div>
+
+      <!-- h. Thông tin nguyên tố -->
+      <div class="card">
+        <div class="card-title">
+          <span>h. Thông tin nguyên tố (IUPAC &amp; SGK THPT)</span>
+        </div>
+        <div id="grid-element-info" class="grid-info"></div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Modal Bảng Tuần Hoàn 118 nguyên tố -->
+  <div id="modal-ptable" class="modal-overlay" onclick="closeModal(event)">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <h2 style="font-size: 1.1rem; font-weight: 800;">Bảng tuần hoàn 118 nguyên tố hóa học</h2>
+          <div style="font-size: 0.75rem; color: var(--text-muted);">Bấm vào một ô để chọn nguyên tố và xem cấu hình chi tiết</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div style="display:flex; gap:8px; font-size:0.75rem; font-weight:600;">
+            <span class="block-s">■ Khối s</span>
+            <span class="block-p">■ Khối p</span>
+            <span class="block-d">■ Khối d</span>
+            <span class="block-f">■ Khối f</span>
+          </div>
+          <button class="btn-icon" onclick="closeModal()">✕</button>
+        </div>
+      </div>
+      <div class="modal-body">
+        <div id="ptable-grid" class="ptable-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* =====================================================================
+       DỮ LIỆU 118 NGUYÊN TỐ HÓA HỌC (IUPAC & SGK HÓA HỌC THPT VIỆT NAM)
+       ===================================================================== */
+    const ELEMENTS_DATA = [
+      { z: 1, symbol: 'H', nameVi: 'Hiđro', nameEn: 'Hydrogen', atomicMass: 1.008, period: 1, group: 1, groupIUPAC: 'IA (1)', block: 's', category: 'nonmetal', row: 1, col: 1 },
+      { z: 2, symbol: 'He', nameVi: 'Heli', nameEn: 'Helium', atomicMass: 4.0026, period: 1, group: 18, groupIUPAC: 'VIIIA (18)', block: 's', category: 'noble_gas', row: 1, col: 18 },
+      { z: 3, symbol: 'Li', nameVi: 'Liti', nameEn: 'Lithium', atomicMass: 6.94, period: 2, group: 1, groupIUPAC: 'IA (1)', block: 's', category: 'metal', row: 2, col: 1 },
+      { z: 4, symbol: 'Be', nameVi: 'Beri', nameEn: 'Beryllium', atomicMass: 9.0122, period: 2, group: 2, groupIUPAC: 'IIA (2)', block: 's', category: 'metal', row: 2, col: 2 },
+      { z: 5, symbol: 'B', nameVi: 'Bo', nameEn: 'Boron', atomicMass: 10.81, period: 2, group: 13, groupIUPAC: 'IIIA (13)', block: 'p', category: 'metalloid', row: 2, col: 13 },
+      { z: 6, symbol: 'C', nameVi: 'Cacbon', nameEn: 'Carbon', atomicMass: 12.011, period: 2, group: 14, groupIUPAC: 'IVA (14)', block: 'p', category: 'nonmetal', row: 2, col: 14 },
+      { z: 7, symbol: 'N', nameVi: 'Nitơ', nameEn: 'Nitrogen', atomicMass: 14.007, period: 2, group: 15, groupIUPAC: 'VA (15)', block: 'p', category: 'nonmetal', row: 2, col: 15 },
+      { z: 8, symbol: 'O', nameVi: 'Oxi', nameEn: 'Oxygen', atomicMass: 15.999, period: 2, group: 16, groupIUPAC: 'VIA (16)', block: 'p', category: 'nonmetal', row: 2, col: 16 },
+      { z: 9, symbol: 'F', nameVi: 'Flo', nameEn: 'Fluorine', atomicMass: 18.998, period: 2, group: 17, groupIUPAC: 'VIIA (17)', block: 'p', category: 'nonmetal', row: 2, col: 17 },
+      { z: 10, symbol: 'Ne', nameVi: 'Neon', nameEn: 'Neon', atomicMass: 20.180, period: 2, group: 18, groupIUPAC: 'VIIIA (18)', block: 'p', category: 'noble_gas', row: 2, col: 18 },
+      { z: 11, symbol: 'Na', nameVi: 'Natri', nameEn: 'Sodium', atomicMass: 22.990, period: 3, group: 1, groupIUPAC: 'IA (1)', block: 's', category: 'metal', row: 3, col: 1 },
+      { z: 12, symbol: 'Mg', nameVi: 'Magie', nameEn: 'Magnesium', atomicMass: 24.305, period: 3, group: 2, groupIUPAC: 'IIA (2)', block: 's', category: 'metal', row: 3, col: 2 },
+      { z: 13, symbol: 'Al', nameVi: 'Nhôm', nameEn: 'Aluminium', atomicMass: 26.982, period: 3, group: 13, groupIUPAC: 'IIIA (13)', block: 'p', category: 'metal', row: 3, col: 13 },
+      { z: 14, symbol: 'Si', nameVi: 'Silic', nameEn: 'Silicon', atomicMass: 28.085, period: 3, group: 14, groupIUPAC: 'IVA (14)', block: 'p', category: 'metalloid', row: 3, col: 14 },
+      { z: 15, symbol: 'P', nameVi: 'Photpho', nameEn: 'Phosphorus', atomicMass: 30.974, period: 3, group: 15, groupIUPAC: 'VA (15)', block: 'p', category: 'nonmetal', row: 3, col: 15 },
+      { z: 16, symbol: 'S', nameVi: 'Lưu huỳnh', nameEn: 'Sulfur', atomicMass: 32.06, period: 3, group: 16, groupIUPAC: 'VIA (16)', block: 'p', category: 'nonmetal', row: 3, col: 16 },
+      { z: 17, symbol: 'Cl', nameVi: 'Clo', nameEn: 'Chlorine', atomicMass: 35.45, period: 3, group: 17, groupIUPAC: 'VIIA (17)', block: 'p', category: 'nonmetal', row: 3, col: 17 },
+      { z: 18, symbol: 'Ar', nameVi: 'Agon', nameEn: 'Argon', atomicMass: 39.95, period: 3, group: 18, groupIUPAC: 'VIIIA (18)', block: 'p', category: 'noble_gas', row: 3, col: 18 },
+      { z: 19, symbol: 'K', nameVi: 'Kali', nameEn: 'Potassium', atomicMass: 39.098, period: 4, group: 1, groupIUPAC: 'IA (1)', block: 's', category: 'metal', row: 4, col: 1 },
+      { z: 20, symbol: 'Ca', nameVi: 'Canxi', nameEn: 'Calcium', atomicMass: 40.078, period: 4, group: 2, groupIUPAC: 'IIA (2)', block: 's', category: 'metal', row: 4, col: 2 },
+      { z: 21, symbol: 'Sc', nameVi: 'Scandi', nameEn: 'Scandium', atomicMass: 44.956, period: 4, group: 3, groupIUPAC: 'IIIB (3)', block: 'd', category: 'metal', row: 4, col: 3 },
+      { z: 22, symbol: 'Ti', nameVi: 'Titan', nameEn: 'Titanium', atomicMass: 47.867, period: 4, group: 4, groupIUPAC: 'IVB (4)', block: 'd', category: 'metal', row: 4, col: 4 },
+      { z: 23, symbol: 'V', nameVi: 'Vani', nameEn: 'Vanadium', atomicMass: 50.942, period: 4, group: 5, groupIUPAC: 'VB (5)', block: 'd', category: 'metal', row: 4, col: 5 },
+      { z: 24, symbol: 'Cr', nameVi: 'Crom', nameEn: 'Chromium', atomicMass: 51.996, period: 4, group: 6, groupIUPAC: 'VIB (6)', block: 'd', category: 'metal', row: 4, col: 6 },
+      { z: 25, symbol: 'Mn', nameVi: 'Mangan', nameEn: 'Manganese', atomicMass: 54.938, period: 4, group: 7, groupIUPAC: 'VIIB (7)', block: 'd', category: 'metal', row: 4, col: 7 },
+      { z: 26, symbol: 'Fe', nameVi: 'Sắt', nameEn: 'Iron', atomicMass: 55.845, period: 4, group: 8, groupIUPAC: 'VIIIB (8)', block: 'd', category: 'metal', row: 4, col: 8 },
+      { z: 27, symbol: 'Co', nameVi: 'Coban', nameEn: 'Cobalt', atomicMass: 58.933, period: 4, group: 9, groupIUPAC: 'VIIIB (9)', block: 'd', category: 'metal', row: 4, col: 9 },
+      { z: 28, symbol: 'Ni', nameVi: 'Niken', nameEn: 'Nickel', atomicMass: 58.693, period: 4, group: 10, groupIUPAC: 'VIIIB (10)', block: 'd', category: 'metal', row: 4, col: 10 },
+      { z: 29, symbol: 'Cu', nameVi: 'Đồng', nameEn: 'Copper', atomicMass: 63.546, period: 4, group: 11, groupIUPAC: 'IB (11)', block: 'd', category: 'metal', row: 4, col: 11 },
+      { z: 30, symbol: 'Zn', nameVi: 'Kẽm', nameEn: 'Zinc', atomicMass: 65.38, period: 4, group: 12, groupIUPAC: 'IIB (12)', block: 'd', category: 'metal', row: 4, col: 12 },
+      { z: 31, symbol: 'Ga', nameVi: 'Gali', nameEn: 'Gallium', atomicMass: 69.723, period: 4, group: 13, groupIUPAC: 'IIIA (13)', block: 'p', category: 'metal', row: 4, col: 13 },
+      { z: 32, symbol: 'Ge', nameVi: 'Gecmani', nameEn: 'Germanium', atomicMass: 72.630, period: 4, group: 14, groupIUPAC: 'IVA (14)', block: 'p', category: 'metalloid', row: 4, col: 14 },
+      { z: 33, symbol: 'As', nameVi: 'Asen', nameEn: 'Arsenic', atomicMass: 74.922, period: 4, group: 15, groupIUPAC: 'VA (15)', block: 'p', category: 'metalloid', row: 4, col: 15 },
+      { z: 34, symbol: 'Se', nameVi: 'Selen', nameEn: 'Selenium', atomicMass: 78.971, period: 4, group: 16, groupIUPAC: 'VIA (16)', block: 'p', category: 'nonmetal', row: 4, col: 16 },
+      { z: 35, symbol: 'Br', nameVi: 'Brom', nameEn: 'Bromine', atomicMass: 79.904, period: 4, group: 17, groupIUPAC: 'VIIA (17)', block: 'p', category: 'nonmetal', row: 4, col: 17 },
+      { z: 36, symbol: 'Kr', nameVi: 'Kripton', nameEn: 'Krypton', atomicMass: 83.798, period: 4, group: 18, groupIUPAC: 'VIIIA (18)', block: 'p', category: 'noble_gas', row: 4, col: 18 },
+      { z: 37, symbol: 'Rb', nameVi: 'Rubidi', nameEn: 'Rubidium', atomicMass: 85.468, period: 5, group: 1, groupIUPAC: 'IA (1)', block: 's', category: 'metal', row: 5, col: 1 },
+      { z: 38, symbol: 'Sr', nameVi: 'Stronti', nameEn: 'Strontium', atomicMass: 87.62, period: 5, group: 2, groupIUPAC: 'IIA (2)', block: 's', category: 'metal', row: 5, col: 2 },
+      { z: 39, symbol: 'Y', nameVi: 'Ytri', nameEn: 'Yttrium', atomicMass: 88.906, period: 5, group: 3, groupIUPAC: 'IIIB (3)', block: 'd', category: 'metal', row: 5, col: 3 },
+      { z: 40, symbol: 'Zr', nameVi: 'Zirconi', nameEn: 'Zirconium', atomicMass: 91.224, period: 5, group: 4, groupIUPAC: 'IVB (4)', block: 'd', category: 'metal', row: 5, col: 4 },
+      { z: 41, symbol: 'Nb', nameVi: 'Niobi', nameEn: 'Niobium', atomicMass: 92.906, period: 5, group: 5, groupIUPAC: 'VB (5)', block: 'd', category: 'metal', row: 5, col: 5 },
+      { z: 42, symbol: 'Mo', nameVi: 'Molipđen', nameEn: 'Molybdenum', atomicMass: 95.95, period: 5, group: 6, groupIUPAC: 'VIB (6)', block: 'd', category: 'metal', row: 5, col: 6 },
+      { z: 43, symbol: 'Tc', nameVi: 'Tecneti', nameEn: 'Technetium', atomicMass: '[98]', period: 5, group: 7, groupIUPAC: 'VIIB (7)', block: 'd', category: 'metal', row: 5, col: 7 },
+      { z: 44, symbol: 'Ru', nameVi: 'Ruteni', nameEn: 'Ruthenium', atomicMass: 101.07, period: 5, group: 8, groupIUPAC: 'VIIIB (8)', block: 'd', category: 'metal', row: 5, col: 8 },
+      { z: 45, symbol: 'Rh', nameVi: 'Rodi', nameEn: 'Rhodium', atomicMass: 102.91, period: 5, group: 9, groupIUPAC: 'VIIIB (9)', block: 'd', category: 'metal', row: 5, col: 9 },
+      { z: 46, symbol: 'Pd', nameVi: 'Paladi', nameEn: 'Palladium', atomicMass: 106.42, period: 5, group: 10, groupIUPAC: 'VIIIB (10)', block: 'd', category: 'metal', row: 5, col: 10 },
+      { z: 47, symbol: 'Ag', nameVi: 'Bạc', nameEn: 'Silver', atomicMass: 107.87, period: 5, group: 11, groupIUPAC: 'IB (11)', block: 'd', category: 'metal', row: 5, col: 11 },
+      { z: 48, symbol: 'Cd', nameVi: 'Cadimi', nameEn: 'Cadmium', atomicMass: 112.41, period: 5, group: 12, groupIUPAC: 'IIB (12)', block: 'd', category: 'metal', row: 5, col: 12 },
+      { z: 49, symbol: 'In', nameVi: 'Indi', nameEn: 'Indium', atomicMass: 114.82, period: 5, group: 13, groupIUPAC: 'IIIA (13)', block: 'p', category: 'metal', row: 5, col: 13 },
+      { z: 50, symbol: 'Sn', nameVi: 'Thiếc', nameEn: 'Tin', atomicMass: 118.71, period: 5, group: 14, groupIUPAC: 'IVA (14)', block: 'p', category: 'metal', row: 5, col: 14 },
+      { z: 51, symbol: 'Sb', nameVi: 'Antimon', nameEn: 'Antimony', atomicMass: 121.76, period: 5, group: 15, groupIUPAC: 'VA (15)', block: 'p', category: 'metalloid', row: 5, col: 15 },
+      { z: 52, symbol: 'Te', nameVi: 'Telu', nameEn: 'Tellurium', atomicMass: 127.60, period: 5, group: 16, groupIUPAC: 'VIA (16)', block: 'p', category: 'metalloid', row: 5, col: 16 },
+      { z: 53, symbol: 'I', nameVi: 'Iot', nameEn: 'Iodine', atomicMass: 126.90, period: 5, group: 17, groupIUPAC: 'VIIA (17)', block: 'p', category: 'nonmetal', row: 5, col: 17 },
+      { z: 54, symbol: 'Xe', nameVi: 'Xenon', nameEn: 'Xenon', atomicMass: 131.29, period: 5, group: 18, groupIUPAC: 'VIIIA (18)', block: 'p', category: 'noble_gas', row: 5, col: 18 },
+      { z: 55, symbol: 'Cs', nameVi: 'Xesi', nameEn: 'Cesium', atomicMass: 132.91, period: 6, group: 1, groupIUPAC: 'IA (1)', block: 's', category: 'metal', row: 6, col: 1 },
+      { z: 56, symbol: 'Ba', nameVi: 'Bari', nameEn: 'Barium', atomicMass: 137.33, period: 6, group: 2, groupIUPAC: 'IIA (2)', block: 's', category: 'metal', row: 6, col: 2 },
+      { z: 57, symbol: 'La', nameVi: 'Lantan', nameEn: 'Lanthanum', atomicMass: 138.91, period: 6, group: 3, groupIUPAC: 'IIIB (3)', block: 'd', category: 'metal', row: 8, col: 3 },
+      { z: 58, symbol: 'Ce', nameVi: 'Xeri', nameEn: 'Cerium', atomicMass: 140.12, period: 6, group: 3, groupIUPAC: 'IIIB (3)', block: 'f', category: 'metal', row: 8, col: 4 },
+      { z: 59, symbol: 'Pr', nameVi: 'Prazeodim', nameEn: 'Praseodymium', atomicMass: 140.91, period: 6, group: 3, groupIUPAC: 'IIIB (3)', block: 'f', category: 'metal', row: 8, col: 5 },
+      { z: 60, symbol: 'Nd', nameVi: 'Neodim', nameEn: 'Neodymium', atomicMass: 144.24, period: 6, group: 3, groupIUPAC: 'IIIB (3)', block: 'f', category: 'metal', row: 8, col: 6 },
+      { z: 61, symbol: 'Pm', nameVi: 'Prometi', nameEn: 'Promethium', atomicMass: '[145]', period: 6, group: 3, groupIUPAC: 'IIIB (3)', block: 'f', category: 'metal', row: 8, col: 7 },
+      { z: 62, symbol: 'Sm', nameVi: 'Samari', nameEn: 'Samarium', atomicMass: 150.36, period: 6, group: 3, groupIUPAC: 'IIIB (3)', block: 'f', category: 'metal', row: 8, col: 8 },
+      { z: 63, symbol: 'Eu', nameVi: 'Europi', nameEn: 'Europium', atomicMass: 151.96, period: 6, group: 3, groupIUPAC: 'IIIB (3)', block: 'f', category: 'metal', row: 8, col: 9 },
+      { z: 64, symbol: 'Gd', nameVi: 'Gadolini', nameEn: 'Gadolinium', atomicMass: 157.25, period: 6, group: 3, groupIUPAC: 'IIIB (3)', block: 'f', category: 'metal', row: 8, col: 10 },
+      { z: 65, symbol: 'Tb', nameVi: 'Técbi', nameEn: 'Terbium', atomicMass: 158.93, period: 6, group: 3, groupIUPAC: 'IIIB (3)', block: 'f', category: 'metal', row: 8, col: 11 },
+      { z: 66, symbol: 'Dy', nameVi: 'Đisprosi', nameEn: 'Dysprosium', atomicMass: 162.50, period: 6, group: 3, groupIUPAC: 'IIIB (3)', block: 'f', category: 'metal', row: 8, col: 12 },
+      { z: 67, symbol: 'Ho', nameVi: 'Holmi', nameEn: 'Holmium', atomicMass: 164.93, period: 6, group: 3, groupIUPAC: 'IIIB (3)', block: 'f', category: 'metal', row: 8, col: 13 },
+      { z: 68, symbol: 'Er', nameVi: 'Erbi', nameEn: 'Erbium', atomicMass: 167.26, period: 6, group: 3, groupIUPAC: 'IIIB (3)', block: 'f', category: 'metal', row: 8, col: 14 },
+      { z: 69, symbol: 'Tm', nameVi: 'Tuli', nameEn: 'Thulium', atomicMass: 168.93, period: 6, group: 3, groupIUPAC: 'IIIB (3)', block: 'f', category: 'metal', row: 8, col: 15 },
+      { z: 70, symbol: 'Yb', nameVi: 'Ytebi', nameEn: 'Ytterbium', atomicMass: 173.05, period: 6, group: 3, groupIUPAC: 'IIIB (3)', block: 'f', category: 'metal', row: 8, col: 16 },
+      { z: 71, symbol: 'Lu', nameVi: 'Luteti', nameEn: 'Lutetium', atomicMass: 174.97, period: 6, group: 3, groupIUPAC: 'IIIB (3)', block: 'd', category: 'metal', row: 8, col: 17 },
+      { z: 72, symbol: 'Hf', nameVi: 'Hafni', nameEn: 'Hafnium', atomicMass: 178.49, period: 6, group: 4, groupIUPAC: 'IVB (4)', block: 'd', category: 'metal', row: 6, col: 4 },
+      { z: 73, symbol: 'Ta', nameVi: 'Tantan', nameEn: 'Tantalum', atomicMass: 180.95, period: 6, group: 5, groupIUPAC: 'VB (5)', block: 'd', category: 'metal', row: 6, col: 5 },
+      { z: 74, symbol: 'W', nameVi: 'Vonfram', nameEn: 'Tungsten', atomicMass: 183.84, period: 6, group: 6, groupIUPAC: 'VIB (6)', block: 'd', category: 'metal', row: 6, col: 6 },
+      { z: 75, symbol: 'Re', nameVi: 'Reni', nameEn: 'Rhenium', atomicMass: 186.21, period: 6, group: 7, groupIUPAC: 'VIIB (7)', block: 'd', category: 'metal', row: 6, col: 7 },
+      { z: 76, symbol: 'Os', nameVi: 'Osimi', nameEn: 'Osmium', atomicMass: 190.23, period: 6, group: 8, groupIUPAC: 'VIIIB (8)', block: 'd', category: 'metal', row: 6, col: 8 },
+      { z: 77, symbol: 'Ir', nameVi: 'Iridi', nameEn: 'Iridium', atomicMass: 192.22, period: 6, group: 9, groupIUPAC: 'VIIIB (9)', block: 'd', category: 'metal', row: 6, col: 9 },
+      { z: 78, symbol: 'Pt', nameVi: 'Bạch kim', nameEn: 'Platinum', atomicMass: 195.08, period: 6, group: 10, groupIUPAC: 'VIIIB (10)', block: 'd', category: 'metal', row: 6, col: 10 },
+      { z: 79, symbol: 'Au', nameVi: 'Vàng', nameEn: 'Gold', atomicMass: 196.97, period: 6, group: 11, groupIUPAC: 'IB (11)', block: 'd', category: 'metal', row: 6, col: 11 },
+      { z: 80, symbol: 'Hg', nameVi: 'Thủy ngân', nameEn: 'Mercury', atomicMass: 200.59, period: 6, group: 12, groupIUPAC: 'IIB (12)', block: 'd', category: 'metal', row: 6, col: 12 },
+      { z: 81, symbol: 'Tl', nameVi: 'Tali', nameEn: 'Thallium', atomicMass: 204.38, period: 6, group: 13, groupIUPAC: 'IIIA (13)', block: 'p', category: 'metal', row: 6, col: 13 },
+      { z: 82, symbol: 'Pb', nameVi: 'Chì', nameEn: 'Lead', atomicMass: 207.2, period: 6, group: 14, groupIUPAC: 'IVA (14)', block: 'p', category: 'metal', row: 6, col: 14 },
+      { z: 83, symbol: 'Bi', nameVi: 'Bismut', nameEn: 'Bismuth', atomicMass: 208.98, period: 6, group: 15, groupIUPAC: 'VA (15)', block: 'p', category: 'metal', row: 6, col: 15 },
+      { z: 84, symbol: 'Po', nameVi: 'Poloni', nameEn: 'Polonium', atomicMass: '[209]', period: 6, group: 16, groupIUPAC: 'VIA (16)', block: 'p', category: 'metalloid', row: 6, col: 16 },
+      { z: 85, symbol: 'At', nameVi: 'Atatin', nameEn: 'Astatine', atomicMass: '[210]', period: 6, group: 17, groupIUPAC: 'VIIA (17)', block: 'p', category: 'nonmetal', row: 6, col: 17 },
+      { z: 86, symbol: 'Rn', nameVi: 'Radon', nameEn: 'Radon', atomicMass: '[222]', period: 6, group: 18, groupIUPAC: 'VIIIA (18)', block: 'p', category: 'noble_gas', row: 6, col: 18 },
+      { z: 87, symbol: 'Fr', nameVi: 'Franxi', nameEn: 'Francium', atomicMass: '[223]', period: 7, group: 1, groupIUPAC: 'IA (1)', block: 's', category: 'metal', row: 7, col: 1 },
+      { z: 88, symbol: 'Ra', nameVi: 'Radi', nameEn: 'Radium', atomicMass: '[226]', period: 7, group: 2, groupIUPAC: 'IIA (2)', block: 's', category: 'metal', row: 7, col: 2 },
+      { z: 89, symbol: 'Ac', nameVi: 'Actini', nameEn: 'Actinium', atomicMass: '[227]', period: 7, group: 3, groupIUPAC: 'IIIB (3)', block: 'd', category: 'metal', row: 9, col: 3 },
+      { z: 90, symbol: 'Th', nameVi: 'Tori', nameEn: 'Thorium', atomicMass: 232.04, period: 7, group: 3, groupIUPAC: 'IIIB (3)', block: 'd', category: 'metal', row: 9, col: 4 },
+      { z: 91, symbol: 'Pa', nameVi: 'Protactini', nameEn: 'Protactinium', atomicMass: 231.04, period: 7, group: 3, groupIUPAC: 'IIIB (3)', block: 'f', category: 'metal', row: 9, col: 5 },
+      { z: 92, symbol: 'U', nameVi: 'Urani', nameEn: 'Uranium', atomicMass: 238.03, period: 7, group: 3, groupIUPAC: 'IIIB (3)', block: 'f', category: 'metal', row: 9, col: 6 },
+      { z: 93, symbol: 'Np', nameVi: 'Neptuni', nameEn: 'Neptunium', atomicMass: '[237]', period: 7, group: 3, groupIUPAC: 'IIIB (3)', block: 'f', category: 'metal', row: 9, col: 7 },
+      { z: 94, symbol: 'Pu', nameVi: 'Plutoni', nameEn: 'Plutonium', atomicMass: '[244]', period: 7, group: 3, groupIUPAC: 'IIIB (3)', block: 'f', category: 'metal', row: 9, col: 8 },
+      { z: 95, symbol: 'Am', nameVi: 'Americi', nameEn: 'Americium', atomicMass: '[243]', period: 7, group: 3, groupIUPAC: 'IIIB (3)', block: 'f', category: 'metal', row: 9, col: 9 },
+      { z: 96, symbol: 'Cm', nameVi: 'Curi', nameEn: 'Curium', atomicMass: '[247]', period: 7, group: 3, groupIUPAC: 'IIIB (3)', block: 'f', category: 'metal', row: 9, col: 10 },
+      { z: 97, symbol: 'Bk', nameVi: 'Beckeli', nameEn: 'Berkelium', atomicMass: '[247]', period: 7, group: 3, groupIUPAC: 'IIIB (3)', block: 'f', category: 'metal', row: 9, col: 11 },
+      { z: 98, symbol: 'Cf', nameVi: 'Californi', nameEn: 'Californium', atomicMass: '[251]', period: 7, group: 3, groupIUPAC: 'IIIB (3)', block: 'f', category: 'metal', row: 9, col: 12 },
+      { z: 99, symbol: 'Es', nameVi: 'Ensteni', nameEn: 'Einsteinium', atomicMass: '[252]', period: 7, group: 3, groupIUPAC: 'IIIB (3)', block: 'f', category: 'metal', row: 9, col: 13 },
+      { z: 100, symbol: 'Fm', nameVi: 'Fecmi', nameEn: 'Fermium', atomicMass: '[257]', period: 7, group: 3, groupIUPAC: 'IIIB (3)', block: 'f', category: 'metal', row: 9, col: 14 },
+      { z: 101, symbol: 'Md', nameVi: 'Mendelevi', nameEn: 'Mendelevium', atomicMass: '[258]', period: 7, group: 3, groupIUPAC: 'IIIB (3)', block: 'f', category: 'metal', row: 9, col: 15 },
+      { z: 102, symbol: 'No', nameVi: 'Nobeli', nameEn: 'Nobelium', atomicMass: '[259]', period: 7, group: 3, groupIUPAC: 'IIIB (3)', block: 'f', category: 'metal', row: 9, col: 16 },
+      { z: 103, symbol: 'Lr', nameVi: 'Lorenxi', nameEn: 'Lawrencium', atomicMass: '[266]', period: 7, group: 3, groupIUPAC: 'IIIB (3)', block: 'p', category: 'metal', row: 9, col: 17 },
+      { z: 104, symbol: 'Rf', nameVi: 'Rutherfordi', nameEn: 'Rutherfordium', atomicMass: '[267]', period: 7, group: 4, groupIUPAC: 'IVB (4)', block: 'd', category: 'metal', row: 7, col: 4 },
+      { z: 105, symbol: 'Db', nameVi: 'Đubni', nameEn: 'Dubnium', atomicMass: '[268]', period: 7, group: 5, groupIUPAC: 'VB (5)', block: 'd', category: 'metal', row: 7, col: 5 },
+      { z: 106, symbol: 'Sg', nameVi: 'Seaborgi', nameEn: 'Seaborgium', atomicMass: '[269]', period: 7, group: 6, groupIUPAC: 'VIB (6)', block: 'd', category: 'metal', row: 7, col: 6 },
+      { z: 107, symbol: 'Bh', nameVi: 'Bohri', nameEn: 'Bohrium', atomicMass: '[270]', period: 7, group: 7, groupIUPAC: 'VIIB (7)', block: 'd', category: 'metal', row: 7, col: 7 },
+      { z: 108, symbol: 'Hs', nameVi: 'Hassi', nameEn: 'Hassium', atomicMass: '[270]', period: 7, group: 8, groupIUPAC: 'VIIIB (8)', block: 'd', category: 'metal', row: 7, col: 8 },
+      { z: 109, symbol: 'Mt', nameVi: 'Meitneri', nameEn: 'Meitnerium', atomicMass: '[278]', period: 7, group: 9, groupIUPAC: 'VIIIB (9)', block: 'd', category: 'metal', row: 7, col: 9 },
+      { z: 110, symbol: 'Ds', nameVi: 'Đarmstati', nameEn: 'Darmstadtium', atomicMass: '[281]', period: 7, group: 10, groupIUPAC: 'VIIIB (10)', block: 'd', category: 'metal', row: 7, col: 10 },
+      { z: 111, symbol: 'Rg', nameVi: 'Roentgeni', nameEn: 'Roentgenium', atomicMass: '[282]', period: 7, group: 11, groupIUPAC: 'IB (11)', block: 'd', category: 'metal', row: 7, col: 11 },
+      { z: 112, symbol: 'Cn', nameVi: 'Copernici', nameEn: 'Copernicium', atomicMass: '[285]', period: 7, group: 12, groupIUPAC: 'IIB (12)', block: 'd', category: 'metal', row: 7, col: 12 },
+      { z: 113, symbol: 'Nh', nameVi: 'Nihoni', nameEn: 'Nihonium', atomicMass: '[286]', period: 7, group: 13, groupIUPAC: 'IIIA (13)', block: 'p', category: 'metal', row: 7, col: 13 },
+      { z: 114, symbol: 'Fl', nameVi: 'Flerovi', nameEn: 'Flerovium', atomicMass: '[289]', period: 7, group: 14, groupIUPAC: 'IVA (14)', block: 'p', category: 'metal', row: 7, col: 14 },
+      { z: 115, symbol: 'Mc', nameVi: 'Moscovi', nameEn: 'Moscovium', atomicMass: '[290]', period: 7, group: 15, groupIUPAC: 'VA (15)', block: 'p', category: 'metal', row: 7, col: 15 },
+      { z: 116, symbol: 'Lv', nameVi: 'Livermori', nameEn: 'Livermorium', atomicMass: '[293]', period: 7, group: 16, groupIUPAC: 'VIA (16)', block: 'p', category: 'metal', row: 7, col: 16 },
+      { z: 117, symbol: 'Ts', nameVi: 'Tennessine', nameEn: 'Tennessine', atomicMass: '[294]', period: 7, group: 17, groupIUPAC: 'VIIA (17)', block: 'p', category: 'nonmetal', row: 7, col: 17 },
+      { z: 118, symbol: 'Og', nameVi: 'Oganesson', nameEn: 'Oganesson', atomicMass: '[294]', period: 7, group: 18, groupIUPAC: 'VIIIA (18)', block: 'p', category: 'noble_gas', row: 7, col: 18 }
+    ];
+
+    const AUFBAU_ORDER = [
+      { n: 1, l: 's', max: 2 },
+      { n: 2, l: 's', max: 2 },
+      { n: 2, l: 'p', max: 6 },
+      { n: 3, l: 's', max: 2 },
+      { n: 3, l: 'p', max: 6 },
+      { n: 4, l: 's', max: 2 },
+      { n: 3, l: 'd', max: 10 },
+      { n: 4, l: 'p', max: 6 },
+      { n: 5, l: 's', max: 2 },
+      { n: 4, l: 'd', max: 10 },
+      { n: 5, l: 'p', max: 6 },
+      { n: 6, l: 's', max: 2 },
+      { n: 4, l: 'f', max: 14 },
+      { n: 5, l: 'd', max: 10 },
+      { n: 6, l: 'p', max: 6 },
+      { n: 7, l: 's', max: 2 },
+      { n: 5, l: 'f', max: 14 },
+      { n: 6, l: 'd', max: 10 },
+      { n: 7, l: 'p', max: 6 }
+    ];
+
+    const NOBLE_GASES = [
+      { z: 2, symbol: 'He' },
+      { z: 10, symbol: 'Ne' },
+      { z: 18, symbol: 'Ar' },
+      { z: 36, symbol: 'Kr' },
+      { z: 54, symbol: 'Xe' },
+      { z: 86, symbol: 'Rn' },
+      { z: 118, symbol: 'Og' }
+    ];
+
+    const EXCEPTIONS = {
+      24: { z: 24, config: { '3d': 5, '4s': 1 }, reason: 'Phân lớp 3d bán bão hòa (3d⁵) và 4s bán bão hòa (4s¹) bền vững hơn cấu hình lý thuyết 3d⁴ 4s² do năng lượng trao đổi cực đại.', isTHPT: true },
+      29: { z: 29, config: { '3d': 10, '4s': 1 }, reason: 'Phân lớp 3d bão hòa hoàn toàn (3d¹⁰) bền vững hơn cấu hình lý thuyết 3d⁹ 4s² do tính đối xứng cầu.', isTHPT: true },
+      41: { z: 41, config: { '4d': 4, '5s': 1 }, reason: 'Sự chuyển dịch 1 electron từ 5s sang 4d làm giảm lực đẩy Coulomb electron-electron.', isTHPT: false },
+      42: { z: 42, config: { '4d': 5, '5s': 1 }, reason: 'Phân lớp 4d bán bão hòa (4d⁵) và 5s bán bão hòa (5s¹) bền vững hơn so với 4d⁴ 5s².', isTHPT: false },
+      44: { z: 44, config: { '4d': 7, '5s': 1 }, reason: 'Cấu hình 4d⁷ 5s¹ có tổng mức năng lượng thấp hơn và ổn định hơn cấu hình lý thuyết 4d⁶ 5s².', isTHPT: false },
+      45: { z: 45, config: { '4d': 8, '5s': 1 }, reason: 'Cấu hình 4d⁸ 5s¹ đạt năng lượng trao đổi tối ưu hơn so với cấu hình 4d⁷ 5s².', isTHPT: false },
+      46: { z: 46, config: { '4d': 10, '5s': 0 }, reason: 'Phân lớp 4d bão hòa hoàn toàn (4d¹⁰ 5s⁰) đạt trạng thái cực tiểu năng lượng khép kín.', isTHPT: false },
+      47: { z: 47, config: { '4d': 10, '5s': 1 }, reason: 'Phân lớp 4d bão hòa hoàn toàn (4d¹⁰) tạo độ bền phân lớp vượt trội hơn 4d⁹ 5s².', isTHPT: false },
+      57: { z: 57, config: { '5d': 1, '6s': 2 }, reason: 'Electron thứ 57 điền vào phân lớp 5d trước 4f do mức năng lượng 5d thấp hơn ở Lantan.', isTHPT: false },
+      58: { z: 58, config: { '4f': 1, '5d': 1, '6s': 2 }, reason: 'Mức năng lượng 4f và 5d rất gần nhau ở Xeri, electron phân bố đồng thời.', isTHPT: false },
+      64: { z: 64, config: { '4f': 7, '5d': 1, '6s': 2 }, reason: 'Phân lớp 4f bán bão hòa hoàn hảo (4f⁷) có năng lượng trao đổi cực đại rất bền vững.', isTHPT: false },
+      78: { z: 78, config: { '4f': 14, '5d': 9, '6s': 1 }, reason: 'Hiệu ứng tương đối tính làm co orbital 6s và bền hóa cấu hình 5d⁹ 6s¹.', isTHPT: false },
+      79: { z: 79, config: { '4f': 14, '5d': 10, '6s': 1 }, reason: 'Hiệu ứng tương đối tính làm co orbital s và bền hóa phân lớp d bão hòa (5d¹⁰ 6s¹).', isTHPT: false },
+      89: { z: 89, config: { '6d': 1, '7s': 2 }, reason: 'Electron điền vào phân lớp 6d trước 5f do mức năng lượng 6d thấp hơn ở Actini.', isTHPT: false },
+      90: { z: 90, config: { '6d': 2, '7s': 2 }, reason: 'Cấu hình 6d² 7s² có năng lượng thấp hơn 5f² 7s² đối với nguyên tử Tori.', isTHPT: false },
+      91: { z: 91, config: { '5f': 2, '6d': 1, '7s': 2 }, reason: 'Mức năng lượng 5f và 6d cạnh tranh, electron phân bố 5f² 6d¹ 7s².', isTHPT: false },
+      92: { z: 92, config: { '5f': 3, '6d': 1, '7s': 2 }, reason: 'Mức năng lượng 5f và 6d rất gần nhau ở Urani, phân bố 5f³ 6d¹ 7s².', isTHPT: false },
+      93: { z: 93, config: { '5f': 4, '6d': 1, '7s': 2 }, reason: 'Electron phân bố giữa 5f và 6d (5f⁴ 6d¹ 7s²).', isTHPT: false },
+      96: { z: 96, config: { '5f': 7, '6d': 1, '7s': 2 }, reason: 'Phân lớp 5f bán bão hòa (5f⁷) đạt cấu hình đối xứng bền vững.', isTHPT: false },
+      103: { z: 103, config: { '5f': 14, '7s': 2, '7p': 1 }, reason: 'Hiệu ứng tương đối tính làm co và bền hóa orbital 7p1/2 hơn 6d ở Lorenxi.', isTHPT: false }
+    };
+
+    const SUPERSCRIPT = { '0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹' };
+    function toSuper(n) { return String(n).split('').map(c => SUPERSCRIPT[c] || c).join(''); }
+
+    /* =====================================================================
+       TRẠNG THÁI BIẾN JS NỘI BỘ (KHÔNG DÙNG LOCALSTORAGE/SESSIONSTORAGE)
+       ===================================================================== */
+    let currentExceptionMode = 'thpt'; // 'thpt' | 'full'
+    let currentOrderMode = 'shell';    // 'shell' | 'energy'
+    let currentResult = null;
+    let recentHistory = [];            // lưu trong biến JS
+
+    /* =====================================================================
+       HÀM TÍNH TOÁN HÓA HỌC CHUẨN XÁC
+       ===================================================================== */
+    function getNeutralSubshells(z, mode) {
+      let remaining = z;
+      const map = new Map();
+      for (const item of AUFBAU_ORDER) {
+        if (remaining <= 0) break;
+        const fill = Math.min(remaining, item.max);
+        map.set(`${item.n}${item.l}`, fill);
+        remaining -= fill;
+      }
+      const ex = EXCEPTIONS[z];
+      if (ex && (mode === 'full' || ex.isTHPT)) {
+        for (const [k, v] of Object.entries(ex.config)) {
+          if (v === 0) map.delete(k);
+          else map.set(k, v);
+        }
+      }
+      return map;
+    }
+
+    function getIonSubshells(z, charge, mode) {
+      const counts = getNeutralSubshells(z, mode);
+      if (charge === 0) return counts;
+
+      if (charge > 0) {
+        // Cation: bỏ từ n lớn nhất; trong cùng n bỏ l lớn nhất (f > d > p > s)
+        const lVal = { f: 3, d: 2, p: 1, s: 0 };
+        let toRemove = charge;
+        while (toRemove > 0) {
+          const active = [];
+          for (const [key, eCount] of counts.entries()) {
+            if (eCount > 0) {
+              const n = parseInt(key[0], 10);
+              const l = key[1];
+              active.push({ key, n, l, rank: lVal[l], eCount });
+            }
+          }
+          if (active.length === 0) break;
+          active.sort((a, b) => b.n !== a.n ? b.n - a.n : b.rank - a.rank);
+          const target = active[0];
+          const rem = Math.min(toRemove, target.eCount);
+          if (target.eCount - rem <= 0) counts.delete(target.key);
+          else counts.set(target.key, target.eCount - rem);
+          toRemove -= rem;
+        }
+      } else {
+        // Anion: thêm vào phân lớp tiếp theo chưa đầy theo Aufbau
+        let toAdd = Math.abs(charge);
+        for (const item of AUFBAU_ORDER) {
+          if (toAdd <= 0) break;
+          const key = `${item.n}${item.l}`;
+          const cur = counts.get(key) || 0;
+          if (cur < item.max) {
+            const space = item.max - cur;
+            const add = Math.min(toAdd, space);
+            counts.set(key, cur + add);
+            toAdd -= add;
+          }
+        }
+      }
+      return counts;
+    }
+
+    function sortSubshells(list, order) {
+      const copy = [...list];
+      const lRank = { s: 0, p: 1, d: 2, f: 3 };
+      if (order === 'shell') {
+        copy.sort((a, b) => a.n !== b.n ? a.n - b.n : lRank[a.l] - lRank[b.l]);
+      } else {
+        const idx = (n, l) => AUFBAU_ORDER.findIndex(x => x.n === n && x.l === l);
+        copy.sort((a, b) => idx(a.n, a.l) - idx(b.n, b.l));
+      }
+      return copy;
+    }
+
+    function calcValence(element, subshells, isIon) {
+      const prefix = isIon ? 'Đối với ion: ' : '';
+      if (element.block === 's' || element.block === 'p') {
+        let maxN = 0;
+        for (const s of subshells) if (s.n > maxN && s.electrons > 0) maxN = s.n;
+        let count = 0;
+        for (const s of subshells) if (s.n === maxN) count += s.electrons;
+        return {
+          count,
+          desc: `${prefix}Thuộc khối ${element.block.toUpperCase()}, số e hóa trị bằng số e lớp ngoài cùng (lớp n = ${maxN}): ${count} e.`
+        };
+      }
+      if (element.block === 'd') {
+        const n = element.period;
+        let ns = 0, n_1d = 0;
+        for (const s of subshells) {
+          if (s.n === n && s.l === 's') ns += s.electrons;
+          if (s.n === n - 1 && s.l === 'd') n_1d += s.electrons;
+        }
+        const total = ns + n_1d;
+        if (element.group === 12) {
+          return {
+            count: total,
+            desc: `${prefix}Thuộc khối d (nhóm 12): ${n}s (${ns}e) + ${n-1}d (${n_1d}e) = ${total} e. Thường chỉ ${ns > 0 ? ns : 2} electron ${n}s tham gia phản ứng vì phân lớp (n-1)d¹⁰ đã bão hòa hoàn toàn.`
+          };
+        }
+        return {
+          count: total,
+          desc: `${prefix}Thuộc khối d, số e hóa trị = ${n}s (${ns}e) + ${n-1}d (${n_1d}e) = ${total} e.`
+        };
+      }
+      const n = element.period;
+      let ns = 0, n_1d = 0, n_2f = 0;
+      for (const s of subshells) {
+        if (s.n === n && s.l === 's') ns += s.electrons;
+        if (s.n === n - 1 && s.l === 'd') n_1d += s.electrons;
+        if (s.n === n - 2 && s.l === 'f') n_2f += s.electrons;
+      }
+      const total = ns + n_1d + n_2f;
+      return {
+        count: total,
+        desc: `${prefix}Thuộc khối f, số e hóa trị = ${n}s (${ns}e) + ${n-1}d (${n_1d}e) + ${n-2}f (${n_2f}e) = ${total} e.`
+      };
+    }
+
+    function calculateConfig(element, charge, orderMode, exMode) {
+      const totalElectrons = element.z - charge;
+      if (totalElectrons < 0) throw new Error(`Số electron không thể âm (${totalElectrons} e).`);
+
+      const counts = getIonSubshells(element.z, charge, exMode);
+      const subshells = [];
+      const caps = { s: 2, p: 6, d: 10, f: 14 };
+      const orbs = { s: 1, p: 3, d: 5, f: 7 };
+
+      for (const [key, eCount] of counts.entries()) {
+        if (eCount > 0) {
+          const n = parseInt(key[0], 10);
+          const l = key[1];
+          const m = orbs[l];
+          const orbList = [];
+          for (let i = 0; i < m; i++) {
+            orbList.push({
+              up: i < Math.min(eCount, m),
+              down: eCount > m && i < (eCount - m)
+            });
+          }
+          subshells.push({ n, l, electrons: eCount, max: caps[l], orbitals: orbList, m });
+        }
+      }
+
+      const sorted = sortSubshells(subshells, orderMode);
+
+      // Cấu hình đầy đủ
+      const fullHtml = sorted.map(s => `${s.n}${s.l}<sup>${s.electrons}</sup>`).join(' ');
+      const fullText = sorted.map(s => `${s.n}${s.l}${toSuper(s.electrons)}`).join(' ');
+
+      // Cấu hình rút gọn
+      let condensedHtml = '';
+      let condensedText = '';
+      let condensedNote = '';
+      let nobleSymbol = '';
+
+      if (totalElectrons <= 2) {
+        condensedHtml = fullHtml;
+        condensedText = fullText;
+        condensedNote = 'H và He (hoặc ion có ≤ 2 electron) không có dạng rút gọn vì không có khí hiếm đứng trước.';
+      } else {
+        let bestNoble = null;
+        for (const ng of NOBLE_GASES) {
+          if (ng.z < totalElectrons) bestNoble = ng;
+          else break;
+        }
+        nobleSymbol = bestNoble.symbol;
+        const nobleCoreCounts = getNeutralSubshells(bestNoble.z, exMode);
+        const rem = [];
+        for (const s of sorted) {
+          const core = nobleCoreCounts.get(`${s.n}${s.l}`) || 0;
+          const diff = s.electrons - core;
+          if (diff > 0) {
+            rem.push({ ...s, electrons: diff });
+          }
+        }
+        if (rem.length === 0) {
+          condensedHtml = `[${nobleSymbol}]`;
+          condensedText = `[${nobleSymbol}]`;
+        } else {
+          condensedHtml = `[${nobleSymbol}] ` + rem.map(s => `${s.n}${s.l}<sup>${s.electrons}</sup>`).join(' ');
+          condensedText = `[${nobleSymbol}] ` + rem.map(s => `${s.n}${s.l}${toSuper(s.electrons)}`).join(' ');
+        }
+      }
+
+      // Số electron từng lớp K, L, M, N, O, P, Q
+      const shells = { K:0, L:0, M:0, N:0, O:0, P:0, Q:0 };
+      const sNames = { 1:'K', 2:'L', 3:'M', 4:'N', 5:'O', 6:'P', 7:'Q' };
+      for (const s of sorted) {
+        shells[sNames[s.n]] += s.electrons;
+      }
+
+      // Tổng theo phân lớp s, p, d, f
+      const subTotals = { s:0, p:0, d:0, f:0 };
+      for (const s of sorted) {
+        subTotals[s.l] += s.electrons;
+      }
+
+      // Electron độc thân
+      let unpaired = 0;
+      const unpList = [];
+      for (const s of sorted) {
+        let u = s.electrons <= s.m ? s.electrons : (2 * s.m - s.electrons);
+        if (u > 0) {
+          unpaired += u;
+          unpList.push(`${s.n}${s.l}${toSuper(s.electrons)} (${u} e độc thân)`);
+        }
+      }
+
+      const magneticVi = unpaired > 0 ? 'Thuận từ' : 'Nghịch từ';
+      const magneticDesc = unpaired > 0
+        ? `Có ${unpaired} electron độc thân chưa ghép đôi, tạo mômen từ nguyên tử nên bị hút bởi từ trường bên ngoài.`
+        : `Tất cả electron đã ghép đôi hoàn toàn (spin ↑↓ đối song), tổng mômen từ triệt tiêu nên bị đẩy nhẹ bởi từ trường bên ngoài.`;
+
+      // Hóa trị
+      const valence = calcValence(element, sorted, charge !== 0);
+
+      // Ngoại lệ
+      const rawEx = EXCEPTIONS[element.z];
+      const isEx = Boolean(rawEx) && (exMode === 'full' || rawEx.isTHPT);
+
+      return {
+        element,
+        charge,
+        totalElectrons,
+        isIon: charge !== 0,
+        subshells: sorted,
+        fullHtml,
+        fullText,
+        condensedHtml,
+        condensedText,
+        condensedNote,
+        nobleSymbol,
+        shells,
+        subTotals,
+        unpaired,
+        unpList,
+        magneticVi,
+        magneticDesc,
+        valence,
+        isException: isEx,
+        exceptionReason: isEx ? rawEx.reason : null,
+        isPredicted: element.z >= 104
+      };
+    }
+
+    /* =====================================================================
+       PARSING VÀ TÌM KIẾM
+       ===================================================================== */
+    function removeAccents(str) {
+      return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').toLowerCase().trim();
+    }
+
+    function findElement(query) {
+      const q = query.trim();
+      if (!q) return null;
+      const z = parseInt(q, 10);
+      if (!isNaN(z) && String(z) === q && z >= 1 && z <= 118) {
+        return ELEMENTS_DATA[z - 1];
+      }
+      const lq = q.toLowerCase();
+      const nq = removeAccents(q);
+      return ELEMENTS_DATA.find(e =>
+        e.symbol.toLowerCase() === lq ||
+        e.nameVi.toLowerCase() === lq ||
+        e.nameEn.toLowerCase() === lq ||
+        removeAccents(e.nameVi) === nq
+      ) || null;
+    }
+
+    function parseInput(rawInput, defaultCharge = 0) {
+      const input = rawInput.trim();
+      if (!input) return { element: null, charge: defaultCharge };
+
+      let base = input;
+      let charge = defaultCharge;
+
+      const numSign = input.match(/^(.*?)([1-8])([+-])$/i);
+      const signNum = input.match(/^(.*?)([+-])([1-8])$/i);
+      const multiPlus = input.match(/^(.*?)(\+{1,8})$/);
+      const multiMinus = input.match(/^(.*?)(-{1,4})$/);
+
+      if (numSign) {
+        base = numSign[1].trim();
+        charge = numSign[3] === '+' ? parseInt(numSign[2], 10) : -parseInt(numSign[2], 10);
+      } else if (signNum) {
+        base = signNum[1].trim();
+        charge = signNum[2] === '+' ? parseInt(signNum[3], 10) : -parseInt(signNum[3], 10);
+      } else if (multiPlus && multiPlus[1]) {
+        base = multiPlus[1].trim();
+        charge = multiPlus[2].length;
+      } else if (multiMinus && multiMinus[1]) {
+        base = multiMinus[1].trim();
+        charge = -multiMinus[2].length;
+      }
+
+      const el = findElement(base);
+      if (!el) {
+        return { element: null, charge, error: `Không tìm thấy nguyên tố nào phù hợp với "${base}". Vui lòng nhập số Z (1-118), ký hiệu (Fe, Cu) hoặc tên.` };
+      }
+      if (charge > el.z) {
+        return { element: el, charge, error: `Điện tích ion dương (+${charge}) không thể lớn hơn số hiệu nguyên tử Z (${el.z}) của ${el.nameVi}!` };
+      }
+      return { element: el, charge };
+    }
+
+    /* =====================================================================
+       RENDER GIAO DIỆN
+       ===================================================================== */
+    function renderResult(res) {
+      currentResult = res;
+
+      document.getElementById('results-wrapper').style.display = 'block';
+      document.getElementById('result-summary-bar').style.display = 'flex';
+
+      // Summary bar
+      const symBadge = document.getElementById('badge-element-sym');
+      symBadge.innerText = res.element.symbol;
+      symBadge.className = `result-sym-badge block-${res.element.block}`;
+
+      const ionText = res.charge === 0 ? '' : (Math.abs(res.charge) === 1 ? (res.charge > 0 ? '⁺' : '⁻') : `${toSuper(Math.abs(res.charge))}${res.charge > 0 ? '⁺' : '⁻'}`);
+      document.getElementById('title-element-name').innerText = res.isIon ? `Ion ${res.element.symbol}${ionText} (${res.element.nameVi})` : res.element.nameVi;
+      document.getElementById('badge-z').innerText = `Z = ${res.element.z}`;
+      document.getElementById('badge-electrons').innerText = `${res.totalElectrons} e`;
+      document.getElementById('sub-element-info').innerText = `${res.element.nameVi} (${res.element.nameEn}) • M = ${res.element.atomicMass} • Chu kỳ ${res.element.period}, Nhóm ${res.element.groupIUPAC}`;
+
+      // Exception card
+      const exCard = document.getElementById('card-exception');
+      if (res.isException) {
+        exCard.style.display = 'block';
+        document.getElementById('text-exception-reason').innerText = res.exceptionReason;
+      } else {
+        exCard.style.display = 'none';
+      }
+
+      // a. Cấu hình đầy đủ
+      document.getElementById('label-order-hint').innerText = currentOrderMode === 'shell' ? 'Sắp theo lớp n tăng dần' : 'Sắp theo mức năng lượng tăng dần';
+      document.getElementById('box-full-config').innerHTML = res.subshells.map(s => `<span class="config-subshell"><span class="block-${s.l}">${s.n}${s.l}</span><sup>${s.electrons}</sup></span>`).join('');
+
+      // b. Cấu hình rút gọn
+      const condBox = document.getElementById('box-condensed-config');
+      const condHint = document.getElementById('label-condensed-hint');
+      if (res.condensedNote) {
+        condBox.innerHTML = `<div>${res.fullText}</div><div style="font-size:0.8rem; font-weight:normal; color:var(--text-muted); font-style:italic; margin-top:4px;">${res.condensedNote}</div>`;
+        condHint.innerText = '';
+      } else {
+        condHint.innerText = res.isIon ? `Rút gọn theo ${res.totalElectrons} e của ion` : '';
+        const coreTag = `<span style="color:#6366f1; margin-right:8px;">[${res.nobleSymbol}]</span>`;
+        const rest = res.condensedHtml.replace(`[${res.nobleSymbol}]`, '').trim();
+        condBox.innerHTML = `${coreTag}${rest}`;
+      }
+
+      // c. Sơ đồ orbital
+      const orbBox = document.getElementById('box-orbital-diagram');
+      orbBox.innerHTML = '';
+      res.subshells.forEach(s => {
+        const group = document.createElement('div');
+        group.className = 'orbital-group';
+
+        const boxes = document.createElement('div');
+        boxes.className = 'orbital-boxes';
+
+        s.orbitals.forEach((o, idx) => {
+          const b = document.createElement('div');
+          b.className = 'orbital-box';
+          let spins = '';
+          if (o.up) spins += '<span class="spin-up">↑</span>';
+          if (o.down) spins += '<span class="spin-down">↓</span>';
+          if (!o.up && !o.down) spins = '<span style="color:var(--border); font-size:0.8rem;">·</span>';
+          b.innerHTML = spins;
+          b.title = `${s.n}${s.l} (ô ${idx+1}): ${o.up && o.down ? '2 e ghép đôi (↑↓)' : (o.up ? '1 e độc thân (↑)' : 'Trống')}`;
+          boxes.appendChild(b);
+        });
+
+        const lbl = document.createElement('div');
+        lbl.className = `orbital-label block-${s.l}`;
+        lbl.innerHTML = `${s.n}${s.l}<sup>${s.electrons}</sup>`;
+
+        group.appendChild(boxes);
+        group.appendChild(lbl);
+        orbBox.appendChild(group);
+      });
+
+      // d. Số electron từng lớp
+      document.getElementById('label-total-electrons').innerText = `Tổng: ${res.totalElectrons} e`;
+      const gridShells = document.getElementById('grid-shells');
+      gridShells.innerHTML = '';
+      const sMap = [
+        { name: 'K (n=1)', count: res.shells.K },
+        { name: 'L (n=2)', count: res.shells.L },
+        { name: 'M (n=3)', count: res.shells.M },
+        { name: 'N (n=4)', count: res.shells.N },
+        { name: 'O (n=5)', count: res.shells.O },
+        { name: 'P (n=6)', count: res.shells.P },
+        { name: 'Q (n=7)', count: res.shells.Q }
+      ];
+      sMap.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'shell-item';
+        div.style.opacity = item.count > 0 ? '1' : '0.4';
+        div.innerHTML = `<div class="shell-name">Lớp ${item.name}</div><div class="shell-count">${item.count}</div>`;
+        gridShells.appendChild(div);
+      });
+
+      // e. Số electron từng phân lớp
+      document.getElementById('count-block-s').innerText = `${res.subTotals.s} e`;
+      document.getElementById('count-block-p').innerText = `${res.subTotals.p} e`;
+      document.getElementById('count-block-d').innerText = `${res.subTotals.d} e`;
+      document.getElementById('count-block-f').innerText = `${res.subTotals.f} e`;
+
+      const subDetail = document.getElementById('subshells-detail');
+      subDetail.innerHTML = res.subshells.map(s => `<span style="padding:3px 8px; border-radius:6px; background:var(--card-sub); border:1px solid var(--border); font-family:monospace; font-size:0.8rem;">${s.n}${s.l}: <strong>${s.electrons}e</strong></span>`).join('');
+
+      // f. Độc thân & Tính chất từ
+      document.getElementById('count-unpaired').innerText = `${res.unpaired}`;
+      document.getElementById('text-unpaired-list').innerText = res.unpList.length > 0 ? `Tại: ${res.unpList.join(', ')}` : 'Tất cả các orbital đều đã ghép đôi hoàn toàn';
+
+      const magBadge = document.getElementById('badge-magnetic');
+      magBadge.innerText = res.magneticVi;
+      if (res.unpaired > 0) {
+        magBadge.style.backgroundColor = 'var(--s-bg)';
+        magBadge.style.color = 'var(--s-text)';
+      } else {
+        magBadge.style.backgroundColor = 'var(--p-bg)';
+        magBadge.style.color = 'var(--p-text)';
+      }
+      document.getElementById('text-magnetic-desc').innerText = res.magneticDesc;
+
+      // g. Hóa trị
+      document.getElementById('count-valence').innerText = res.valence.count;
+      document.getElementById('text-valence-desc').innerText = res.valence.desc;
+
+      // h. Thông tin nguyên tố
+      const catLabels = { metal: 'Kim loại', nonmetal: 'Phi kim', metalloid: 'Á kim', noble_gas: 'Khí hiếm' };
+      const infoGrid = document.getElementById('grid-element-info');
+      infoGrid.innerHTML = `
+        <div class="info-item"><label>Số hiệu Z</label><strong>${res.element.z}</strong></div>
+        <div class="info-item"><label>Ký hiệu</label><strong>${res.element.symbol}</strong></div>
+        <div class="info-item"><label>Tên tiếng Việt</label><strong>${res.element.nameVi}</strong></div>
+        <div class="info-item"><label>Tên tiếng Anh (IUPAC)</label><strong>${res.element.nameEn}</strong></div>
+        <div class="info-item"><label>Khối lượng nguyên tử</label><strong>${res.element.atomicMass}</strong></div>
+        <div class="info-item"><label>Chu kỳ</label><strong>Chu kỳ ${res.element.period}</strong></div>
+        <div class="info-item"><label>Nhóm</label><strong>Nhóm ${res.element.groupIUPAC}</strong></div>
+        <div class="info-item"><label>Khối & Phân loại</label><strong>Khối ${res.element.block.toUpperCase()} • ${catLabels[res.element.category]}</strong></div>
+      `;
+
+      // Update history in-memory
+      addHistory(res);
+    }
+
+    /* =====================================================================
+       LỊCH SỬ TRA CỨU (LƯU TRONG BIẾN JS - KHÔNG LOCALSTORAGE)
+       ===================================================================== */
+    function addHistory(res) {
+      const ionText = res.charge === 0 ? '' : (Math.abs(res.charge) === 1 ? (res.charge > 0 ? '⁺' : '⁻') : `${toSuper(Math.abs(res.charge))}${res.charge > 0 ? '⁺' : '⁻'}`);
+      const formula = `${res.element.symbol}${ionText}`;
+      recentHistory = recentHistory.filter(h => h.z !== res.element.z || h.charge !== res.charge);
+      recentHistory.unshift({ z: res.element.z, symbol: res.element.symbol, nameVi: res.element.nameVi, charge: res.charge, formula });
+      if (recentHistory.length > 10) recentHistory.pop();
+      renderHistory();
+    }
+
+    function renderHistory() {
+      const card = document.getElementById('history-card');
+      const container = document.getElementById('history-tags');
+      if (recentHistory.length === 0) {
+        card.style.display = 'none';
+        return;
+      }
+      card.style.display = 'block';
+      container.innerHTML = '';
+      recentHistory.forEach(item => {
+        const btn = document.createElement('button');
+        btn.className = 'history-btn';
+        btn.innerHTML = `<strong>${item.formula}</strong> <span style="color:var(--text-muted); font-size:0.7rem;">(${item.nameVi})</span>`;
+        btn.onclick = () => {
+          document.getElementById('input-search').value = item.formula;
+          document.getElementById('select-charge').value = item.charge;
+          const el = ELEMENTS_DATA[item.z - 1];
+          const res = calculateConfig(el, item.charge, currentOrderMode, currentExceptionMode);
+          renderResult(res);
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    function clearHistory() {
+      recentHistory = [];
+      renderHistory();
+    }
+
+    /* =====================================================================
+       XỬ LÝ SỰ KIỆN GIAO DIỆN
+       ===================================================================== */
+    function executeCalc(customElement, customCharge) {
+      const alertBox = document.getElementById('alert-box');
+      alertBox.style.display = 'none';
+      closeAutocomplete();
+
+      try {
+        let el = customElement;
+        let ch = typeof customCharge === 'number' ? customCharge : parseInt(document.getElementById('select-charge').value, 10);
+
+        if (!el) {
+          const val = document.getElementById('input-search').value;
+          const parsed = parseInput(val, ch);
+          if (parsed.error) {
+            alertBox.innerText = parsed.error;
+            alertBox.style.display = 'block';
+            return;
+          }
+          el = parsed.element;
+          ch = parsed.charge;
+          document.getElementById('select-charge').value = ch;
+        }
+
+        const res = calculateConfig(el, ch, currentOrderMode, currentExceptionMode);
+        renderResult(res);
+      } catch (err) {
+        alertBox.innerText = err.message || 'Lỗi tính toán.';
+        alertBox.style.display = 'block';
+      }
+    }
+
+    function onChargeSelect(val) {
+      if (currentResult) {
+        executeCalc(currentResult.element, parseInt(val, 10));
+      }
+    }
+
+    function setExceptionMode(mode) {
+      currentExceptionMode = mode;
+      document.getElementById('btn-mode-thpt').classList.toggle('active', mode === 'thpt');
+      document.getElementById('btn-mode-full').classList.toggle('active', mode === 'full');
+      if (currentResult) {
+        const res = calculateConfig(currentResult.element, currentResult.charge, currentOrderMode, currentExceptionMode);
+        renderResult(res);
+      }
+    }
+
+    function setOrderMode(mode) {
+      currentOrderMode = mode;
+      document.getElementById('btn-order-shell').classList.toggle('active', mode === 'shell');
+      document.getElementById('btn-order-energy').classList.toggle('active', mode === 'energy');
+      if (currentResult) {
+        const res = calculateConfig(currentResult.element, currentResult.charge, currentOrderMode, currentExceptionMode);
+        renderResult(res);
+      }
+    }
+
+    function toggleTheme() {
+      document.documentElement.classList.toggle('dark');
+    }
+
+    function copyPlainReport() {
+      if (!currentResult) return;
+      const res = currentResult;
+      const report = [
+        `=== KẾT QUẢ TÍNH CẤU HÌNH ELECTRON ===`,
+        `Nguyên tố: ${res.element.nameVi} (${res.element.nameEn}) - Ký hiệu: ${res.element.symbol} - Z = ${res.element.z}`,
+        `Đối tượng: ${res.isIon ? `Ion (điện tích ${res.charge > 0 ? '+'+res.charge : res.charge})` : 'Nguyên tử trung hòa'} - Tổng e: ${res.totalElectrons} e`,
+        `Sắp xếp: ${currentOrderMode === 'shell' ? 'Theo lớp n (SGK)' : 'Theo mức năng lượng (Aufbau)'}`,
+        ``,
+        `a. Cấu hình electron đầy đủ:`,
+        `   ${res.fullText}`,
+        ``,
+        `b. Cấu hình electron rút gọn:`,
+        `   ${res.condensedText}${res.condensedNote ? ` (${res.condensedNote})` : ''}`,
+        ``,
+        `d. Số electron từng lớp:`,
+        `   K: ${res.shells.K} | L: ${res.shells.L} | M: ${res.shells.M} | N: ${res.shells.N} | O: ${res.shells.O} | P: ${res.shells.P} | Q: ${res.shells.Q}`,
+        ``,
+        `e. Số electron từng phân lớp:`,
+        `   s: ${res.subTotals.s} e | p: ${res.subTotals.p} e | d: ${res.subTotals.d} e | f: ${res.subTotals.f} e`,
+        ``,
+        `f. Electron độc thân & Tính chất từ:`,
+        `   Số e độc thân: ${res.unpaired} e ${res.unpList.length ? `(${res.unpList.join(', ')})` : ''}`,
+        `   Tính chất từ: ${res.magneticVi} (${res.magneticDesc})`,
+        ``,
+        `g. Electron hóa trị:`,
+        `   ${res.valence.count} e (${res.valence.desc})`,
+        ``,
+        `h. Thông tin nguyên tố:`,
+        `   Z = ${res.element.z} | Chu kỳ ${res.element.period} | Nhóm ${res.element.groupIUPAC} | Khối ${res.element.block.toUpperCase()}`,
+        res.isException ? `\ni. Ngoại lệ: ${res.exceptionReason}` : ''
+      ].filter(Boolean).join('\n');
+
+      navigator.clipboard.writeText(report).then(() => {
+        const btn = document.getElementById('btn-copy');
+        btn.innerHTML = '✓ <span>Đã sao chép!</span>';
+        setTimeout(() => {
+          btn.innerHTML = '📋 <span>Sao chép kết quả</span>';
+        }, 2000);
+      });
+    }
+
+    /* =====================================================================
+       GỢI Ý TỰ ĐỘNG (AUTOCOMPLETE)
+       ===================================================================== */
+    function onSearchInput(val) {
+      const q = val.trim().replace(/[0-8]?[+-]+$/, '').trim();
+      const box = document.getElementById('autocomplete-box');
+      if (!q) {
+        closeAutocomplete();
+        return;
+      }
+      const lq = q.toLowerCase();
+      const nq = removeAccents(q);
+      const zNum = parseInt(q, 10);
+
+      const matches = ELEMENTS_DATA.filter(e =>
+        (!isNaN(zNum) && e.z === zNum) ||
+        e.symbol.toLowerCase().startsWith(lq) ||
+        e.nameVi.toLowerCase().startsWith(lq) ||
+        removeAccents(e.nameVi).startsWith(nq) ||
+        e.nameEn.toLowerCase().startsWith(lq)
+      ).slice(0, 6);
+
+      if (matches.length === 0) {
+        closeAutocomplete();
+        return;
+      }
+
+      box.innerHTML = '';
+      matches.forEach(el => {
+        const item = document.createElement('div');
+        item.className = 'autocomplete-item';
+        item.innerHTML = `
+          <div><strong style="color:var(--primary); margin-right:6px;">${el.symbol}</strong> ${el.nameVi} <span style="color:var(--text-muted); font-size:0.75rem;">(${el.nameEn})</span></div>
+          <div style="font-size:0.75rem; color:var(--text-muted);">Z = ${el.z}</div>
+        `;
+        item.onclick = () => {
+          document.getElementById('input-search').value = el.symbol;
+          closeAutocomplete();
+          executeCalc(el);
+        };
+        box.appendChild(item);
+      });
+      box.style.display = 'block';
+    }
+
+    function closeAutocomplete() {
+      document.getElementById('autocomplete-box').style.display = 'none';
+    }
+
+    document.addEventListener('click', e => {
+      if (!e.target.closest('.search-input-wrapper')) {
+        closeAutocomplete();
+      }
+    });
+
+    /* =====================================================================
+       MODAL BẢNG TUẦN HOÀN 118 NGUYÊN TỐ
+       ===================================================================== */
+    function buildPeriodicTable() {
+      const grid = document.getElementById('ptable-grid');
+      grid.innerHTML = '';
+
+      const cellMap = new Map();
+      ELEMENTS_DATA.forEach(el => cellMap.set(`${el.row}-${el.col}`, el));
+
+      // Hàng 1-7 (Bảng chính)
+      for (let r = 1; r <= 7; r++) {
+        for (let c = 1; c <= 18; c++) {
+          if (r === 6 && c === 3) {
+            const marker = document.createElement('div');
+            marker.className = 'ptable-marker';
+            marker.innerHTML = '57-71<br>La-Lu';
+            grid.appendChild(marker);
+            continue;
+          }
+          if (r === 7 && c === 3) {
+            const marker = document.createElement('div');
+            marker.className = 'ptable-marker';
+            marker.innerHTML = '89-103<br>Ac-Lr';
+            grid.appendChild(marker);
+            continue;
+          }
+
+          const el = cellMap.get(`${r}-${c}`);
+          if (!el) {
+            const empty = document.createElement('div');
+            grid.appendChild(empty);
+          } else {
+            const cell = document.createElement('div');
+            cell.className = `ptable-cell b-${el.block}`;
+            cell.innerHTML = `<span class="z">${el.z}</span><span class="sym">${el.symbol}</span><span class="name">${el.nameVi}</span>`;
+            cell.onclick = () => {
+              document.getElementById('input-search').value = el.symbol;
+              closeModal();
+              executeCalc(el);
+            };
+            grid.appendChild(cell);
+          }
+        }
+      }
+
+      // Spacer
+      const sp = document.createElement('div');
+      sp.className = 'ptable-spacer';
+      grid.appendChild(sp);
+
+      // Hàng 8: Lantan (57-71)
+      const lblLa = document.createElement('div');
+      lblLa.className = 'series-label';
+      lblLa.innerText = 'Họ Lantan';
+      grid.appendChild(lblLa);
+
+      for (let i = 0; i < 15; i++) {
+        const el = ELEMENTS_DATA[56 + i];
+        const cell = document.createElement('div');
+        cell.className = `ptable-cell b-${el.block}`;
+        cell.innerHTML = `<span class="z">${el.z}</span><span class="sym">${el.symbol}</span><span class="name">${el.nameVi}</span>`;
+        cell.onclick = () => {
+          document.getElementById('input-search').value = el.symbol;
+          closeModal();
+          executeCalc(el);
+        };
+        grid.appendChild(cell);
+      }
+      grid.appendChild(document.createElement('div')); // filler col 18
+
+      // Hàng 9: Actini (89-103)
+      const lblAc = document.createElement('div');
+      lblAc.className = 'series-label';
+      lblAc.innerText = 'Họ Actini';
+      grid.appendChild(lblAc);
+
+      for (let i = 0; i < 15; i++) {
+        const el = ELEMENTS_DATA[88 + i];
+        const cell = document.createElement('div');
+        cell.className = `ptable-cell b-${el.block}`;
+        cell.innerHTML = `<span class="z">${el.z}</span><span class="sym">${el.symbol}</span><span class="name">${el.nameVi}</span>`;
+        cell.onclick = () => {
+          document.getElementById('input-search').value = el.symbol;
+          closeModal();
+          executeCalc(el);
+        };
+        grid.appendChild(cell);
+      }
+      grid.appendChild(document.createElement('div')); // filler col 18
+    }
+
+    function openModal() {
+      document.getElementById('modal-ptable').style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('modal-ptable').style.display = 'none';
+    }
+
+    // Khởi tạo ngay khi tải trang
+    window.addEventListener('DOMContentLoaded', () => {
+      buildPeriodicTable();
+      executeCalc(ELEMENTS_DATA[25]); // Mặc định Fe (Z=26)
+    });
+  </script>
+</body>
+</html>
